@@ -20,16 +20,34 @@ public class OrderService {
 
     @Autowired
     private DiscoveryClient discoveryClient ;
+    
+    
+    @Autowired
+    private RestTemplate restTemplate;
 
     public OrderResponse placeOrder(OrderRequest orderRequest) {
 
         // TODO: 1. retrieve the product details from the product-service
+    	Product product = restTemplate.getForObject(GET_PROD_URL, Product.class, orderRequest.getProductId());
+
+        if (product == null) {
+            throw new RuntimeException("Product not found with ID: " + orderRequest.getProductId());
+        }
 
 
         // TODO: 2. process the order (total price should be = quantity ordered * product price)
+        double totalPrice = product.getPrice() * orderRequest.getQty();
 
 
         // TODO: 3. return the response
+        OrderResponse response = new OrderResponse();
+        response.setOrderId( + new Random().nextLong(10000));
+        response.setProductId(product.getId());
+        response.setProductName(product.getName());
+        response.setQty(orderRequest.getQty());
+        response.setTotalPrice(totalPrice);
+
+        return response;
 
     }
 
